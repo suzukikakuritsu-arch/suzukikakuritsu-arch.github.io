@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <title>Suzuki Emergence Universe</title>
@@ -11,88 +11,56 @@ margin:0;
 background:black;
 color:white;
 font-family:Arial;
-overflow-x:hidden;
+overflow:hidden;
 }
 
-canvas{
+#ui{
 position:fixed;
-top:0;
-left:0;
-z-index:-1;
+top:20px;
+left:20px;
+z-index:10;
 }
 
-section{
-height:100vh;
-display:flex;
-align-items:center;
-justify-content:center;
-flex-direction:column;
-text-align:center;
-padding:20px;
-}
-
-h1{
-font-size:42px;
-margin-bottom:10px;
-}
-
-p{
-max-width:700px;
-opacity:0.7;
+button{
+margin:5px;
+padding:8px 14px;
+font-size:14px;
+cursor:pointer;
 }
 
 #hud{
 position:fixed;
-top:10px;
+top:20px;
 right:20px;
 font-size:14px;
-opacity:0.8;
 }
 
 </style>
+
 </head>
 
 <body>
 
-<canvas id="bg"></canvas>
+<div id="ui">
 
-<div id="hud">
-Entropy: <span id="entropy">0</span><br>
-Clusters: <span id="clusters">0</span>
+<button onclick="toggleAnim()">Start / Stop</button>
+
+<button onclick="resetUniverse()">Reset Universe</button>
+
+<button onclick="zoomOut()">Zoom Out</button>
+
 </div>
 
-<section>
-<h1>Suzuki Information Emergence</h1>
-<p>11D Information Field → Universe → Life → Molecules → Intelligence</p>
-</section>
+<div id="hud">
 
-<section>
-<h1>Cosmic Web</h1>
-<p>Emergent large scale structure</p>
-</section>
+Entropy: <span id="entropy">0</span><br>
+Clusters: <span id="clusters">0</span>
 
-<section>
-<h1>Life Emergence</h1>
-<p>Self-organizing information networks</p>
-</section>
-
-<section>
-<h1>Molecular Systems</h1>
-<p>Attractor chemistry</p>
-</section>
-
-<section>
-<h1>Artificial Intelligence</h1>
-<p>Information evolution</p>
-</section>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
-
 <script>
-
-const canvas=document.getElementById("bg")
 
 const scene=new THREE.Scene()
 
@@ -103,30 +71,30 @@ window.innerWidth/window.innerHeight,
 2000
 )
 
-camera.position.z=100
+camera.position.z=120
 
-const renderer=new THREE.WebGLRenderer({canvas})
+const renderer=new THREE.WebGLRenderer()
 
 renderer.setSize(window.innerWidth,window.innerHeight)
 
-
-// ----------------
-// マウス操作
-// ----------------
-
-const controls=new THREE.OrbitControls(camera,renderer.domElement)
-
-controls.enableDamping=true
+document.body.appendChild(renderer.domElement)
 
 
 // ----------------
-// 粒子生成
+// 粒子
 // ----------------
 
-const N=2000
+const N=1500
 
-let positions=new Float32Array(N3)
-let velocity=new Float32Array(N3)
+let positions
+let velocity
+let geometry
+let particles
+
+function createUniverse(){
+
+positions=new Float32Array(N3)
+velocity=new Float32Array(N3)
 
 for(let i=0;i<N;i++){
 
@@ -134,49 +102,38 @@ positions[i3]=(Math.random()-0.5)150
 positions[i3+1]=(Math.random()-0.5)150
 positions[i3+2]=(Math.random()-0.5)150
 
-velocity[i3]=(Math.random()-0.5)0.04
-velocity[i3+1]=(Math.random()-0.5)0.04
-velocity[i3+2]=(Math.random()-0.5)0.04
+velocity[i3]=(Math.random()-0.5)0.05
+velocity[i3+1]=(Math.random()-0.5)0.05
+velocity[i3+2]=(Math.random()-0.5)0.05
 
 }
 
-const geometry=new THREE.BufferGeometry()
+geometry=new THREE.BufferGeometry()
 
 geometry.setAttribute(
 "position",
 new THREE.BufferAttribute(positions,3)
 )
 
-const material=new THREE.PointsMaterial({
-size:0.9
-})
+const material=new THREE.PointsMaterial({size:1})
 
-const particles=new THREE.Points(geometry,material)
+particles=new THREE.Points(geometry,material)
 
 scene.add(particles)
 
+}
 
-// ----------------
-// スクロール
-// ----------------
-
-let scrollY=0
-
-window.addEventListener("scroll",()=>{
-
-scrollY=window.scrollY
-
-})
+createUniverse()
 
 
 // ----------------
-// 創発ダイナミクス
+// ダイナミクス
 // ----------------
 
 function step(){
 
-let clusterCount=0
-let energy=0
+let clusters=0
+let entropy=0
 
 for(let i=0;i<N;i++){
 
@@ -186,7 +143,7 @@ let z=positions[i3+2]
 
 let r=Math.sqrt(xx+yy+zz)+0.0001
 
-let force=-0.0004r
+let force=-0.0005r
 
 velocity[i3]+=forcex/r
 velocity[i3+1]+=forcey/r
@@ -194,23 +151,46 @@ velocity[i3+2]+=forcez/r
 
 positions[i3]+=velocity[i3]
 positions[i3+1]+=velocity[i3+1]
-positions[i3+2]+=velocity[i3+2]
+positions[i3+2]+=velocity[i*3+2]
 
-energy+=Math.abs(force)
+entropy+=Math.abs(force)
 
-if(r<20){
-
-clusterCount++
-
-}
+if(r<20) clusters++
 
 }
 
 geometry.attributes.position.needsUpdate=true
 
-document.getElementById("entropy").innerText=(energy).toFixed(3)
+document.getElementById("entropy").innerText=entropy.toFixed(3)
 
-document.getElementById("clusters").innerText=clusterCount
+document.getElementById("clusters").innerText=clusters
+
+}
+
+
+// ----------------
+// UI操作
+// ----------------
+
+let running=true
+
+function toggleAnim(){
+
+running=!running
+
+}
+
+function resetUniverse(){
+
+scene.remove(particles)
+
+createUniverse()
+
+}
+
+function zoomOut(){
+
+camera.position.z+=20
 
 }
 
@@ -223,14 +203,13 @@ function animate(){
 
 requestAnimationFrame(animate)
 
+if(running){
+
 step()
 
-controls.update()
-
 particles.rotation.y+=0.0005
-particles.rotation.x+=0.0002
 
-camera.position.z=100 + scrollY0.05
+}
 
 renderer.render(scene,camera)
 
