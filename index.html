@@ -2,11 +2,11 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Suzuki Emergence Universe - Fully Evolved v2.0</title>
+    <title>Suzuki Emergence Universe - Cosmic Web v2.1</title>
     <style>
         body { 
             margin: 0; 
-            background: #000; 
+            background: radial-gradient(circle at center, #0a0a1f 0%, #000002 70%); 
             color: #fff; 
             font-family: 'Segoe UI', sans-serif; 
             overflow: hidden; 
@@ -18,183 +18,174 @@
             z-index: 10; 
         }
         button { 
-            background: linear-gradient(45deg, rgba(255,255,255,0.2), rgba(0,204,255,0.4)); 
-            border: 1px solid #00ccff; 
+            background: linear-gradient(45deg, rgba(255,200,100,0.4), rgba(100,200,255,0.5)); 
+            border: 2px solid rgba(255,255,255,0.6); 
             color: #fff; 
             padding: 12px 24px; 
             cursor: pointer; 
             margin-right: 8px;
-            border-radius: 8px; 
+            border-radius: 25px; 
             font-weight: bold; 
-            transition: all 0.3s ease;
+            transition: all 0.4s ease;
             font-size: 14px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(255,200,100,0.3);
         }
         button:hover { 
-            background: linear-gradient(45deg, rgba(0,204,255,0.6), rgba(255,255,255,0.4)); 
-            box-shadow: 0 0 20px rgba(0,204,255,0.8); 
-            transform: translateY(-2px);
+            background: linear-gradient(45deg, rgba(255,255,100,0.8), rgba(100,255,255,0.8)); 
+            box-shadow: 0 0 40px rgba(255,255,255,0.9); 
+            transform: scale(1.05);
         }
-        button:active { transform: translateY(0); }
         #hud { 
             position: fixed; 
             top: 20px; 
             right: 20px; 
             text-align: right; 
-            font-family: 'Courier New', monospace; 
+            font-family: 'Orbitron', monospace; 
             font-size: 16px;
-            text-shadow: 0 0 10px #00ffff;
+            text-shadow: 0 0 15px #ffffff;
         }
         .val { 
-            color: #00ffff; 
+            color: #ffff88; 
             font-weight: bold; 
-            text-shadow: 0 0 8px #00ffff, 0 0 16px #00ffff;
-            font-size: 18px;
+            text-shadow: 0 0 12px #ffff88;
+            font-size: 20px;
         }
         #info { 
             position: fixed; 
             bottom: 20px; 
             left: 20px; 
             max-width: 450px; 
-            background: rgba(0,20,30,0.85); 
+            background: rgba(10,10,40,0.7); 
             padding: 20px; 
-            border-radius: 15px; 
-            border: 2px solid #00ccff; 
-            backdrop-filter: blur(10px);
-            box-shadow: 0 0 30px rgba(0,204,255,0.3);
+            border-radius: 20px; 
+            border: 2px solid rgba(255,255,200,0.5); 
+            backdrop-filter: blur(15px);
+            box-shadow: 0 0 40px rgba(255,255,255,0.2);
         }
-        #info h3 { margin: 0 0 10px 0; color: #00ffaa; }
-        .metric { color: #ffaa00; font-weight: bold; }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <div id="ui">
-    <button onclick="toggleAnim()">▶ Start / ⏸ Stop</button>
-    <button onclick="resetUniverse()">🔄 Reset Universe</button>
-    <button onclick="randomizeColors()">🌈 Recolor</button>
-    <button onclick="changePreset()">⚡ Preset</button>
+    <button onclick="toggleAnim()">🌌 Start Web</button>
+    <button onclick="resetUniverse()">🔄 Recreate</button>
+    <button onclick="randomizeColors()">💫 Colors</button>
+    <button onclick="toggleWeb()">🕸️ Web Mode</button>
 </div>
 
 <div id="hud">
-    ENTROPY: <span id="entropy" class="val">0.00</span><br>
-    EMERGENCE: <span id="clusters" class="val">0</span><br>
-    DENSITY: <span id="density" class="val">0</span><br>
-    SINGULARITY: <span id="singularity" class="val">0</span>%<br>
-    TIME: <span id="time" class="val">0.0</span>s
+    FIBERS: <span id="fibers" class="val">0</span><br>
+    NODES: <span id="nodes" class="val">0</span><br>
+    CONNECT: <span id="connectivity" class="val">0</span><br>
+    ENERGY: <span id="energy" class="val">0</span><br>
+    TIME: <span id="time" class="val">0</span>s
 </div>
 
 <div id="info">
-    <h3>Suzuki Emergence Universe v2.0</h3>
-    <p>情報創発理論 φ-回転力学シミュレータ<br>
-    <span class="metric">N = 5000 知性体</span>が真のN-body重力で進化</p>
-    <p>観測指標:<br>
-    • <strong>ENTROPY</strong>: 運動エネルギー総量<br>
-    • <strong>EMERGENCE</strong>: 中心クラスター密度<br>
-    • <strong>SINGULARITY</strong>: 特異点形成確率</p>
-    <p>真の創発現象をリアルタイム観測！</p>
+    <h3>🌌 Suzuki Cosmic Web Generator</h3>
+    <p><strong>宇宙の大規模構造生成</strong><br>フィラメント・ウォール・ボイド形成シミュレーション</p>
+    <p>観測:<br>
+    • FIBERS: 宇宙糸密度<br>
+    • NODES: 超クラスター数<br>
+    • CONNECT: 連結強度</p>
+    <p>suzukikakuritsu-arch風 輝く宇宙網！</p>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 
 <script>
-let scene, camera, renderer, particles, geometry;
-let positions, velocities, colors, sizes;
-const N = 5000; // 鈴木理論の知性体
+let scene, camera, renderer, particles, lines, geometry;
+let positions, velocities, colors;
+const N = 8000; // 宇宙網スケール
 let running = true;
 let time = 0;
-let singularityRisk = 0;
+let showWebLines = true;
+let webStrength = 1.0;
 
-const G = 0.08; // 万有情報引力定数
-const DT = 0.016;
-const SOFTENING = 0.05;
-let preset = 0;
-const presets = ['torus', 'sphere', 'disk', 'random'];
+const G = 0.12;
+const DT = 0.02;
+const LINK_DISTANCE = 120;
 
 function init() {
     scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x000020, 0.002);
+    scene.fog = new THREE.FogExp2(0x0a0a1f, 0.0008);
     
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 5000);
-    camera.position.set(0, 100, 800);
+    // 輝く背景星雲
+    const bgGeometry = new THREE.SphereGeometry(3000, 64, 64);
+    const bgMaterial = new THREE.MeshBasicMaterial({
+        color: 0x001122,
+        side: THREE.BackSide,
+        transparent: true,
+        opacity: 0.3
+    });
+    scene.add(new THREE.Mesh(bgGeometry, bgMaterial));
+    
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
+    camera.position.set(0, 200, 1200);
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(0x000020);
+    renderer.setClearColor(0x0a0a1f);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
+    renderer.toneMappingExposure = 1.5;
     document.body.appendChild(renderer.domElement);
 
-    createUniverse();
-    setupControls();
+    createCosmicWeb();
     animate();
 }
 
-function createUniverse() {
+function createCosmicWeb() {
     if (particles) scene.remove(particles);
+    if (lines) scene.remove(lines);
 
     positions = new Float32Array(N * 3);
     velocities = new Float32Array(N * 3);
     colors = new Float32Array(N * 3);
-    sizes = new Float32Array(N);
 
+    // 宇宙網特有のフィラメント初期配置
     for (let i = 0; i < N; i++) {
         let idx = i * 3;
-        const t = Math.random() * Math.PI * 2;
-        const p = Math.random() * Math.PI;
         
-        if (preset === 0) { // Torus
-            const r1 = 300 + Math.random() * 100;
-            const r2 = 100 + Math.random() * 50;
-            positions[idx] = (r1 + r2 * Math.cos(p)) * Math.cos(t);
-            positions[idx + 1] = (r1 + r2 * Math.cos(p)) * Math.sin(t);
-            positions[idx + 2] = r2 * Math.sin(p);
-        } else if (preset === 1) { // Sphere
-            const r = 250 + Math.random() * 150;
-            const phi = Math.acos(2 * Math.random() - 1);
-            positions[idx] = r * Math.sin(phi) * Math.cos(t);
-            positions[idx + 1] = r * Math.sin(phi) * Math.sin(t);
-            positions[idx + 2] = r * Math.cos(phi);
-        } else if (preset === 2) { // Disk
-            const r = 300 + Math.random() * 100;
-            positions[idx] = r * Math.cos(t);
-            positions[idx + 1] = (Math.random() - 0.5) * 50;
-            positions[idx + 2] = r * Math.sin(t);
-        } else { // Random
-            positions[idx] = (Math.random() - 0.5) * 1000;
-            positions[idx + 1] = (Math.random() - 0.5) * 1000;
-            positions[idx + 2] = (Math.random() - 0.5) * 1000;
-        }
+        // フィラメント状分布 (長軸方向)
+        const filamentX = (Math.random() - 0.5) * 800;
+        const filamentY = (Math.random() - 0.5) * 200;
+        const filamentZ = (Math.random() - 0.5) * 800;
+        
+        positions[idx] = filamentX;
+        positions[idx + 1] = filamentY * 0.3;  // Y圧縮で板状
+        positions[idx + 2] = filamentZ;
 
-        velocities[idx] = (Math.random() - 0.5) * 0.2;
-        velocities[idx + 1] = (Math.random() - 0.5) * 0.2;
-        velocities[idx + 2] = (Math.random() - 0.5) * 0.2;
+        velocities[idx] = (Math.random() - 0.5) * 0.1;
+        velocities[idx + 1] = (Math.random() - 0.5) * 0.15;
+        velocities[idx + 2] = (Math.random() - 0.5) * 0.1;
 
-        const hue = (i / N) + Math.random() * 0.2;
-        const hsv = hsvToRgb(hue % 1, 0.8 + Math.random() * 0.2, 0.8 + Math.random() * 0.2);
+        // 輝くスペクトルカラー
+        const hue = i / N * 0.3 + 0.5;
+        const hsv = hsvToRgb(hue, 0.9, 0.9);
         colors[idx] = hsv[0];
         colors[idx + 1] = hsv[1];
         colors[idx + 2] = hsv[2];
-        sizes[i] = 0.8 + Math.random() * 2.5;
     }
 
+    // 粒子システム
     geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
-    const material = new THREE.PointsMaterial({
-        size: 5,
+    const particleMaterial = new THREE.PointsMaterial({
+        size: 6,
         vertexColors: true,
         transparent: true,
-        opacity: 0.85,
+        opacity: 0.95,
         blending: THREE.AdditiveBlending,
-        sizeAttenuation: true,
-        depthWrite: false
+        sizeAttenuation: true
     });
-
-    particles = new THREE.Points(geometry, material);
+    particles = new THREE.Points(geometry, particleMaterial);
     scene.add(particles);
+
+    updateWebLines();
 }
 
 function hsvToRgb(h, s, v) {
@@ -215,110 +206,125 @@ function hsvToRgb(h, s, v) {
     return [r, g, b];
 }
 
-function computeForces() {
-    const pos = geometry.attributes.position.array;
-    const forcesX = new Float32Array(N);
-    const forcesY = new Float32Array(N);
-    const forcesZ = new Float32Array(N);
+function updateWebLines() {
+    if (lines) scene.remove(lines);
     
-    // 最適化N-body (近傍のみ計算)
+    const pos = geometry.attributes.position.array;
+    const linePositions = [];
+    
+    // 近傍粒子間接続 (宇宙網フィラメント)
     for (let i = 0; i < N; i++) {
-        let idx = i * 3;
-        let fx = 0, fy = 0, fz = 0;
+        const idx = i * 3;
         const x1 = pos[idx], y1 = pos[idx+1], z1 = pos[idx+2];
         
-        for (let j = 0; j < N; j++) {
-            if (i === j) continue;
-            let jdx = j * 3;
-            let dx = pos[jdx] - x1;
-            let dy = pos[jdx+1] - y1;
-            let dz = pos[jdx+2] - z1;
-            let distSq = dx*dx + dy*dy + dz*dz;
+        for (let j = i + 1; j < N && j < i + 20; j++) { // 近傍20個
+            const jdx = j * 3;
+            const dx = pos[jdx] - x1;
+            const dy = pos[jdx+1] - y1;
+            const dz = pos[jdx+2] - z1;
+            const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
             
-            if (distSq < 40000) { // 近傍粒子のみ
-                distSq += SOFTENING;
-                let invDist = 1 / Math.sqrt(distSq);
-                let force = G * invDist * invDist;
-                fx += dx * invDist * force;
-                fy += dy * invDist * force;
-                fz += dz * invDist * force;
+            if (dist < LINK_DISTANCE && dist > 10) {
+                linePositions.push(x1, y1, z1, pos[jdx], pos[jdx+1], pos[jdx+2]);
             }
         }
-        
-        forcesX[i] = fx;
-        forcesY[i] = fy;
-        forcesZ[i] = fz;
     }
     
-    return { forcesX, forcesY, forcesZ };
+    const lineGeometry = new THREE.BufferGeometry();
+    lineGeometry.setAttribute('position', new Float32Array(linePositions));
+    
+    const lineMaterial = new THREE.LineBasicMaterial({
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.4 * webStrength,
+        blending: THREE.AdditiveBlending,
+        linewidth: 2
+    });
+    
+    lines = new THREE.LineSegments(lineGeometry, lineMaterial);
+    if (showWebLines) scene.add(lines);
 }
 
 function step() {
     const pos = geometry.attributes.position.array;
-    const { forcesX, forcesY, forcesZ } = computeForces();
-    
-    let clusterCount = 0;
-    let totalEnergy = 0;
-    let totalDensity = 0;
-    let singularity = 0;
+    let fiberCount = 0, nodeCount = 0, connectivity = 0;
 
+    // 宇宙網重力 + フィラメント形成力
     for (let i = 0; i < N; i++) {
         let idx = i * 3;
+        let fx = 0, fy = 0, fz = 0;
+        const x = pos[idx], y = pos[idx+1], z = pos[idx+2];
         
-        // Velocity Verlet (高精度積分)
-        velocities[idx] += forcesX[i] * DT;
-        velocities[idx+1] += forcesY[i] * DT;
-        velocities[idx+2] += forcesZ[i] * DT;
+        // N-body近似 + フィラメント引力
+        for (let j = 0; j < N; j++) {
+            if (i === j) continue;
+            let jdx = j * 3;
+            let dx = pos[jdx] - x;
+            let dy = pos[jdx+1] - y;
+            let dz = pos[jdx+2] - z;
+            let distSq = dx*dx + dy*dy + dz*dz + 0.1;
+            
+            if (distSq < 50000) {
+                let force = G / distSq;
+                fx += dx / Math.sqrt(distSq) * force;
+                fy += dy / Math.sqrt(distSq) * force;
+                fz += dz / Math.sqrt(distSq) * force;
+            }
+        }
         
-        // 情報ダンピング
-        velocities[idx] *= 0.996;
-        velocities[idx+1] *= 0.996;
-        velocities[idx+2] *= 0.996;
+        velocities[idx] += fx * DT;
+        velocities[idx+1] += fy * DT;
+        velocities[idx+2] += fz * DT;
+        
+        velocities[idx] *= 0.992;
+        velocities[idx+1] *= 0.992;
+        velocities[idx+2] *= 0.992;
         
         pos[idx] += velocities[idx] * DT;
         pos[idx+1] += velocities[idx+1] * DT;
         pos[idx+2] += velocities[idx+2] * DT;
 
-        // 無限境界
-        const dist = Math.hypot(pos[idx], pos[idx+1], pos[idx+2]);
-        if (dist > 2000) {
-            const scale = 1800 / dist;
-            pos[idx] *= scale;
-            pos[idx+1] *= scale;
-            pos[idx+2] *= scale;
+        // 宇宙網スケール境界
+        const dist = Math.hypot(x, y, z);
+        if (dist > 2500) {
+            pos[idx] = x * 2400 / dist;
+            pos[idx+1] = y * 2400 / dist;
+            pos[idx+2] = z * 2400 / dist;
         }
-
-        const speed = Math.hypot(velocities[idx], velocities[idx+1], velocities[idx+2]);
-        totalEnergy += speed;
         
-        if (dist < 60) clusterCount++;
-        totalDensity += 1 / (dist * dist + 1);
-        if (dist < 20) singularity += 1;
+        if (dist < 80) nodeCount++;
+        if (dist < 200 && dist > 100) fiberCount++;
+        connectivity += Math.min(5, 500 / (dist + 10));
     }
 
     geometry.attributes.position.needsUpdate = true;
-    singularityRisk = Math.min(100, (singularity / N) * 10000);
-
-    // HUD更新
-    document.getElementById("entropy").innerText = (totalEnergy / 100).toFixed(1);
-    document.getElementById("clusters").innerText = clusterCount;
-    document.getElementById("density").innerText = totalDensity.toFixed(0);
-    document.getElementById("singularity").innerText = singularityRisk.toFixed(0);
-    document.getElementById("time").innerText = (time += DT * 60).toFixed(1);
+    
+    // Web線更新 (適度な頻度)
+    if (Math.random() < 0.1) updateWebLines();
+    
+    document.getElementById("fibers").innerText = fiberCount;
+    document.getElementById("nodes").innerText = nodeCount;
+    document.getElementById("connectivity").innerText = connectivity.toFixed(0);
+    document.getElementById("energy").innerText = (time * 0.01).toFixed(1);
+    document.getElementById("time").innerText = time.toFixed(0);
 }
 
 function animate() {
     requestAnimationFrame(animate);
-    if (running) step();
+    if (running) {
+        step();
+        time += 1;
+    }
     
-    // 動的カメラ軌道
-    const camTime = time * 0.0005;
-    particles.rotation.y += 0.004;
-    particles.rotation.z = Math.sin(camTime) * 0.05;
+    // 宇宙網回転
+    particles.rotation.y += 0.002;
+    particles.rotation.x += 0.0005;
     
-    camera.position.x = Math.sin(camTime * 0.7) * 400;
-    camera.position.y = Math.sin(camTime * 0.3) * 200;
-    camera.position.z = 700 + Math.cos(camTime * 0.5) * 300;
+    // 流動的カメラ
+    const camTime = time * 0.0002;
+    camera.position.x = Math.sin(camTime) * 800;
+    camera.position.y = Math.sin(camTime * 1.3) * 400;
+    camera.position.z = 1200 + Math.cos(camTime * 0.7) * 500;
     camera.lookAt(0, 0, 0);
     
     renderer.render(scene, camera);
@@ -326,20 +332,19 @@ function animate() {
 
 function toggleAnim() { 
     running = !running; 
-    document.querySelector('button:first-child').innerText = running ? '⏸ Stop' : '▶ Start';
+    document.querySelector('button:first-child').innerText = running ? '⏸️ Pause Web' : '🌌 Start Web';
 }
 
 function resetUniverse() { 
-    createUniverse(); 
-    time = 0; 
-    singularityRisk = 0;
+    createCosmicWeb(); 
+    time = 0;
 }
 
 function randomizeColors() {
     const col = geometry.attributes.color.array;
     for (let i = 0; i < N; i++) {
         let idx = i * 3;
-        const hue = Math.random();
+        const hue = Math.random() * 0.5 + 0.5;
         const hsv = hsvToRgb(hue, 1, 1);
         col[idx] = hsv[0];
         col[idx+1] = hsv[1];
@@ -348,21 +353,12 @@ function randomizeColors() {
     geometry.attributes.color.needsUpdate = true;
 }
 
-function changePreset() {
-    preset = (preset + 1) % presets.length;
-    document.querySelector('button:last-child').innerText = `⚡ ${presets[preset].toUpperCase()}`;
-    resetUniverse();
-}
-
-function setupControls() {
-    document.querySelector('button:last-child').innerText = `⚡ ${presets[preset].toUpperCase()}`;
-    
-    // キーボードショートカット
-    document.addEventListener('keydown', (e) => {
-        if (e.code === 'Space') toggleAnim();
-        if (e.code === 'KeyR') resetUniverse();
-        if (e.code === 'KeyC') randomizeColors();
-    });
+function toggleWeb() {
+    showWebLines = !showWebLines;
+    webStrength = showWebLines ? 1.2 : 0.3;
+    if (showWebLines && lines) scene.add(lines);
+    else if (lines) scene.remove(lines);
+    document.querySelector('button:last-child').innerText = showWebLines ? '🕸️ Hide Web' : '🕸️ Show Web';
 }
 
 window.addEventListener('resize', () => {
