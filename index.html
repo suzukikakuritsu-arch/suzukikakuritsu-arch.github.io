@@ -4,16 +4,14 @@
     <meta charset="UTF-8">
     <title>Suzuki Emergence Universe</title>
     <style>
-        body { margin: 0; background: #000; color: #fff; font-family: 'Inter', Arial, sans-serif; overflow: hidden; }
-        #ui { position: fixed; top: 20px; left: 20px; z-index: 10; display: flex; gap: 10px; }
+        body { margin: 0; background: #000; color: #fff; font-family: sans-serif; overflow: hidden; }
+        #ui { position: fixed; top: 20px; left: 20px; z-index: 10; }
         button { 
-            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); 
-            color: white; padding: 10px 18px; cursor: pointer; backdrop-filter: blur(5px);
-            transition: 0.3s; border-radius: 4px;
+            background: rgba(255,255,255,0.15); border: 1px solid #555; 
+            color: #fff; padding: 8px 15px; cursor: pointer; margin-right: 5px;
         }
-        button:hover { background: rgba(255,255,255,0.2); }
-        #hud { position: fixed; top: 20px; right: 20px; font-size: 13px; text-align: right; line-height: 1.6; letter-spacing: 1px; }
-        span { color: #00ffcc; font-weight: bold; }
+        #hud { position: fixed; top: 20px; right: 20px; text-align: right; font-family: monospace; }
+        .val { color: #00ffff; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -21,26 +19,25 @@
 <div id="ui">
     <button onclick="toggleAnim()">Start / Stop</button>
     <button onclick="resetUniverse()">Reset</button>
-    <button onclick="zoomOut()">Zoom Out</button>
 </div>
 
 <div id="hud">
-    ENTROPY: <span id="entropy">0</span><br>
-    EMERGENCE CLUSTERS: <span id="clusters">0</span>
+    ENTROPY: <span id="entropy" class="val">0</span><br>
+    EMERGENCE: <span id="clusters" class="val">0</span>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 
 <script>
 let scene, camera, renderer, particles, geometry;
-let positions, velocity;
-const N = 1600; // 記事数に同期した粒子数
+let positions, velocities;
+const N = 1600; // 1600の知性
 let running = true;
 
 function init() {
     scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 3000);
-    camera.position.z = 250;
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+    camera.position.z = 400;
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -51,32 +48,33 @@ function init() {
 }
 
 function createUniverse() {
-    if (particles) {
-        scene.remove(particles);
-        geometry.dispose();
-    }
+    if (particles) scene.remove(particles);
 
     positions = new Float32Array(N * 3);
-    velocity = new Float32Array(N * 3);
+    velocities = new Float32Array(N * 3);
 
     for (let i = 0; i < N; i++) {
-        // 初期配置：広範囲に分散
-        positions[i * 3] = (Math.random() - 0.5) * 400;
-        positions[i * 3 + 1] = (Math.random() - 0.5) * 400;
-        positions[i * 3 + 2] = (Math.random() - 0.5) * 400;
+        let idx = i * 3;
+        // 初期配置を球状に分散
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos((Math.random() * 2) - 1);
+        const r = 200 + Math.random() * 100;
 
-        velocity[i * 3] = (Math.random() - 0.5) * 0.2;
-        velocity[i * 3 + 1] = (Math.random() - 0.5) * 0.2;
-        velocity[i * 3 + 2] = (Math.random() - 0.5) * 0.2;
+        positions[idx] = r * Math.sin(phi) * Math.cos(theta);
+        positions[idx + 1] = r * Math.sin(phi) * Math.sin(theta);
+        positions[idx + 2] = r * Math.cos(phi);
+
+        velocities[idx] = (Math.random() - 0.5) * 0.5;
+        velocities[idx + 1] = (Math.random() - 0.5) * 0.5;
+        velocities[idx + 2] = (Math.random() - 0.5) * 0.5;
     }
 
     geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
-    // 粒子自体の発光表現
     const material = new THREE.PointsMaterial({
-        size: 2,
-        color: 0x00ffff,
+        size: 3,
+        color: 0x00ccff,
         transparent: true,
         opacity: 0.8,
         blending: THREE.AdditiveBlending
@@ -87,45 +85,42 @@ function createUniverse() {
 }
 
 function step() {
+    const pos = geometry.attributes.position.array;
     let clusterCount = 0;
-    let totalEntropy = 0;
-
-    const posAttr = geometry.attributes.position;
+    let totalEnergy = 0;
 
     for (let i = 0; i < N; i++) {
-        let ix = i * 3;
-        let iy = i * 3 + 1;
-        let iz = i * 3 + 2;
-
-        let x = positions[ix];
-        let y = positions[iy];
-        let z = positions[iz];
-
-        // 中心（起点）への引力シミュレーション
-        let d2 = x*x + y*y + z*z + 0.1;
-        let r = Math.sqrt(d2);
+        let idx = i * 3;
         
-        // 万有引力的な法則を適用
-        let force = -1.5 / d2; 
+        let x = pos[idx];
+        let y = pos[idx + 1];
+        let z = pos[idx + 2];
 
-        velocity[ix] += (x / r) * force;
-        velocity[iy] += (y / r) * force;
-        velocity[iz] += (z / r) * force;
+        let distSq = x*x + y*y + z*z + 0.1;
+        let dist = Math.sqrt(distSq);
 
-        // 速度の更新
-        positions[ix] += velocity[ix];
-        positions[iy] += velocity[iy];
-        positions[iz] += velocity[iz];
+        // 中心（起点）への引き込み
+        let force = -2.0 / distSq; 
+        
+        velocities[idx] += (x / dist) * force;
+        velocities[idx+1] += (y / dist) * force;
+        velocities[idx+2] += (z / dist) * force;
 
-        // エントロピーの計算（速度の分散）
-        totalEntropy += Math.sqrt(velocity[ix]**2 + velocity[iy]**2 + velocity[iz]**2);
+        // 摩擦係数（発散防止）
+        velocities[idx] *= 0.99;
+        velocities[idx+1] *= 0.99;
+        velocities[idx+2] *= 0.99;
 
-        // 特定の半径内に集まったものを「創発」と定義
-        if (r < 30) clusterCount++;
+        pos[idx] += velocities[idx];
+        pos[idx+1] += velocities[idx+1];
+        pos[idx+2] += velocities[idx+2];
+
+        totalEnergy += Math.abs(velocities[idx]) + Math.abs(velocities[idx+1]);
+        if (dist < 50) clusterCount++;
     }
 
-    posAttr.needsUpdate = true;
-    document.getElementById("entropy").innerText = (totalEntropy / N * 100).toFixed(2);
+    geometry.attributes.position.needsUpdate = true;
+    document.getElementById("entropy").innerText = (totalEnergy / 10).toFixed(2);
     document.getElementById("clusters").innerText = clusterCount;
 }
 
@@ -133,15 +128,13 @@ function animate() {
     requestAnimationFrame(animate);
     if (running) {
         step();
-        particles.rotation.y += 0.001;
+        particles.rotation.y += 0.002;
     }
     renderer.render(scene, camera);
 }
 
-// UI functions
 function toggleAnim() { running = !running; }
 function resetUniverse() { createUniverse(); }
-function zoomOut() { camera.position.z += 50; }
 
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
