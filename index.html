@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Suzuki Information Emergence</title>
+<title>Suzuki Emergence Universe</title>
 
 <style>
 
@@ -28,6 +28,7 @@ align-items:center;
 justify-content:center;
 flex-direction:column;
 text-align:center;
+padding:20px;
 }
 
 h1{
@@ -37,7 +38,15 @@ margin-bottom:10px;
 
 p{
 max-width:700px;
-opacity:0.75;
+opacity:0.7;
+}
+
+#hud{
+position:fixed;
+top:10px;
+right:20px;
+font-size:14px;
+opacity:0.8;
 }
 
 </style>
@@ -47,6 +56,11 @@ opacity:0.75;
 
 <canvas id="bg"></canvas>
 
+<div id="hud">
+Entropy: <span id="entropy">0</span><br>
+Clusters: <span id="clusters">0</span>
+</div>
+
 <section>
 <h1>Suzuki Information Emergence</h1>
 <p>11D Information Field → Universe → Life → Molecules → Intelligence</p>
@@ -54,7 +68,7 @@ opacity:0.75;
 
 <section>
 <h1>Cosmic Web</h1>
-<p>Large scale structure formation</p>
+<p>Emergent large scale structure</p>
 </section>
 
 <section>
@@ -64,7 +78,7 @@ opacity:0.75;
 
 <section>
 <h1>Molecular Systems</h1>
-<p>Complex chemical attractors</p>
+<p>Attractor chemistry</p>
 </section>
 
 <section>
@@ -73,6 +87,8 @@ opacity:0.75;
 </section>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
 
 <script>
 
@@ -87,31 +103,40 @@ window.innerWidth/window.innerHeight,
 2000
 )
 
-camera.position.z=80
+camera.position.z=100
 
 const renderer=new THREE.WebGLRenderer({canvas})
 
 renderer.setSize(window.innerWidth,window.innerHeight)
 
 
-// --------------------
-// 粒子生成
-// --------------------
+// ----------------
+// マウス操作
+// ----------------
 
-const N=1500
+const controls=new THREE.OrbitControls(camera,renderer.domElement)
+
+controls.enableDamping=true
+
+
+// ----------------
+// 粒子生成
+// ----------------
+
+const N=2000
 
 let positions=new Float32Array(N3)
 let velocity=new Float32Array(N3)
 
 for(let i=0;i<N;i++){
 
-positions[i3]=(Math.random()-0.5)120
-positions[i3+1]=(Math.random()-0.5)120
-positions[i3+2]=(Math.random()-0.5)120
+positions[i3]=(Math.random()-0.5)150
+positions[i3+1]=(Math.random()-0.5)150
+positions[i3+2]=(Math.random()-0.5)150
 
-velocity[i3]=(Math.random()-0.5)0.03
-velocity[i3+1]=(Math.random()-0.5)0.03
-velocity[i3+2]=(Math.random()-0.5)0.03
+velocity[i3]=(Math.random()-0.5)0.04
+velocity[i3+1]=(Math.random()-0.5)0.04
+velocity[i3+2]=(Math.random()-0.5)0.04
 
 }
 
@@ -123,7 +148,7 @@ new THREE.BufferAttribute(positions,3)
 )
 
 const material=new THREE.PointsMaterial({
-size:0.8
+size:0.9
 })
 
 const particles=new THREE.Points(geometry,material)
@@ -131,9 +156,9 @@ const particles=new THREE.Points(geometry,material)
 scene.add(particles)
 
 
-// --------------------
+// ----------------
 // スクロール
-// --------------------
+// ----------------
 
 let scrollY=0
 
@@ -144,11 +169,14 @@ scrollY=window.scrollY
 })
 
 
-// --------------------
+// ----------------
 // 創発ダイナミクス
-// --------------------
+// ----------------
 
 function step(){
+
+let clusterCount=0
+let energy=0
 
 for(let i=0;i<N;i++){
 
@@ -158,7 +186,7 @@ let z=positions[i3+2]
 
 let r=Math.sqrt(xx+yy+zz)+0.0001
 
-let force=-0.0003r
+let force=-0.0004r
 
 velocity[i3]+=forcex/r
 velocity[i3+1]+=forcey/r
@@ -168,16 +196,28 @@ positions[i3]+=velocity[i3]
 positions[i3+1]+=velocity[i3+1]
 positions[i3+2]+=velocity[i3+2]
 
+energy+=Math.abs(force)
+
+if(r<20){
+
+clusterCount++
+
+}
+
 }
 
 geometry.attributes.position.needsUpdate=true
 
+document.getElementById("entropy").innerText=(energy).toFixed(3)
+
+document.getElementById("clusters").innerText=clusterCount
+
 }
 
 
-// --------------------
+// ----------------
 // アニメーション
-// --------------------
+// ----------------
 
 function animate(){
 
@@ -185,10 +225,12 @@ requestAnimationFrame(animate)
 
 step()
 
-particles.rotation.y+=0.0006
+controls.update()
+
+particles.rotation.y+=0.0005
 particles.rotation.x+=0.0002
 
-camera.position.z=80 + scrollY0.05
+camera.position.z=100 + scrollY0.05
 
 renderer.render(scene,camera)
 
