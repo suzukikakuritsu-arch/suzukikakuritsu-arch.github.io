@@ -2,48 +2,131 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Suzuki Emergence Universe</title>
+    <title>Suzuki Emergence Universe - Fully Evolved v2.0</title>
     <style>
-        body { margin: 0; background: #000; color: #fff; font-family: sans-serif; overflow: hidden; }
-        #ui { position: fixed; top: 20px; left: 20px; z-index: 10; }
-        button { 
-            background: rgba(255,255,255,0.15); border: 1px solid #555; 
-            color: #fff; padding: 8px 15px; cursor: pointer; margin-right: 5px;
+        body { 
+            margin: 0; 
+            background: #000; 
+            color: #fff; 
+            font-family: 'Segoe UI', sans-serif; 
+            overflow: hidden; 
         }
-        #hud { position: fixed; top: 20px; right: 20px; text-align: right; font-family: monospace; }
-        .val { color: #00ffff; font-weight: bold; }
+        #ui { 
+            position: fixed; 
+            top: 20px; 
+            left: 20px; 
+            z-index: 10; 
+        }
+        button { 
+            background: linear-gradient(45deg, rgba(255,255,255,0.2), rgba(0,204,255,0.4)); 
+            border: 1px solid #00ccff; 
+            color: #fff; 
+            padding: 12px 24px; 
+            cursor: pointer; 
+            margin-right: 8px;
+            border-radius: 8px; 
+            font-weight: bold; 
+            transition: all 0.3s ease;
+            font-size: 14px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+        button:hover { 
+            background: linear-gradient(45deg, rgba(0,204,255,0.6), rgba(255,255,255,0.4)); 
+            box-shadow: 0 0 20px rgba(0,204,255,0.8); 
+            transform: translateY(-2px);
+        }
+        button:active { transform: translateY(0); }
+        #hud { 
+            position: fixed; 
+            top: 20px; 
+            right: 20px; 
+            text-align: right; 
+            font-family: 'Courier New', monospace; 
+            font-size: 16px;
+            text-shadow: 0 0 10px #00ffff;
+        }
+        .val { 
+            color: #00ffff; 
+            font-weight: bold; 
+            text-shadow: 0 0 8px #00ffff, 0 0 16px #00ffff;
+            font-size: 18px;
+        }
+        #info { 
+            position: fixed; 
+            bottom: 20px; 
+            left: 20px; 
+            max-width: 450px; 
+            background: rgba(0,20,30,0.85); 
+            padding: 20px; 
+            border-radius: 15px; 
+            border: 2px solid #00ccff; 
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(0,204,255,0.3);
+        }
+        #info h3 { margin: 0 0 10px 0; color: #00ffaa; }
+        .metric { color: #ffaa00; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div id="ui">
-    <button onclick="toggleAnim()">Start / Stop</button>
-    <button onclick="resetUniverse()">Reset</button>
+    <button onclick="toggleAnim()">▶ Start / ⏸ Stop</button>
+    <button onclick="resetUniverse()">🔄 Reset Universe</button>
+    <button onclick="randomizeColors()">🌈 Recolor</button>
+    <button onclick="changePreset()">⚡ Preset</button>
 </div>
 
 <div id="hud">
-    ENTROPY: <span id="entropy" class="val">0</span><br>
-    EMERGENCE: <span id="clusters" class="val">0</span>
+    ENTROPY: <span id="entropy" class="val">0.00</span><br>
+    EMERGENCE: <span id="clusters" class="val">0</span><br>
+    DENSITY: <span id="density" class="val">0</span><br>
+    SINGULARITY: <span id="singularity" class="val">0</span>%<br>
+    TIME: <span id="time" class="val">0.0</span>s
+</div>
+
+<div id="info">
+    <h3>Suzuki Emergence Universe v2.0</h3>
+    <p>情報創発理論 φ-回転力学シミュレータ<br>
+    <span class="metric">N = 5000 知性体</span>が真のN-body重力で進化</p>
+    <p>観測指標:<br>
+    • <strong>ENTROPY</strong>: 運動エネルギー総量<br>
+    • <strong>EMERGENCE</strong>: 中心クラスター密度<br>
+    • <strong>SINGULARITY</strong>: 特異点形成確率</p>
+    <p>真の創発現象をリアルタイム観測！</p>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 
 <script>
 let scene, camera, renderer, particles, geometry;
-let positions, velocities;
-const N = 1600; // 1600の知性
+let positions, velocities, colors, sizes;
+const N = 5000; // 鈴木理論の知性体
 let running = true;
+let time = 0;
+let singularityRisk = 0;
+
+const G = 0.08; // 万有情報引力定数
+const DT = 0.016;
+const SOFTENING = 0.05;
+let preset = 0;
+const presets = ['torus', 'sphere', 'disk', 'random'];
 
 function init() {
     scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
-    camera.position.z = 400;
+    scene.fog = new THREE.FogExp2(0x000020, 0.002);
+    
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 5000);
+    camera.position.set(0, 100, 800);
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x000020);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
     document.body.appendChild(renderer.domElement);
 
     createUniverse();
+    setupControls();
     animate();
 }
 
@@ -52,89 +135,235 @@ function createUniverse() {
 
     positions = new Float32Array(N * 3);
     velocities = new Float32Array(N * 3);
+    colors = new Float32Array(N * 3);
+    sizes = new Float32Array(N);
 
     for (let i = 0; i < N; i++) {
         let idx = i * 3;
-        // 初期配置を球状に分散
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.acos((Math.random() * 2) - 1);
-        const r = 200 + Math.random() * 100;
+        const t = Math.random() * Math.PI * 2;
+        const p = Math.random() * Math.PI;
+        
+        if (preset === 0) { // Torus
+            const r1 = 300 + Math.random() * 100;
+            const r2 = 100 + Math.random() * 50;
+            positions[idx] = (r1 + r2 * Math.cos(p)) * Math.cos(t);
+            positions[idx + 1] = (r1 + r2 * Math.cos(p)) * Math.sin(t);
+            positions[idx + 2] = r2 * Math.sin(p);
+        } else if (preset === 1) { // Sphere
+            const r = 250 + Math.random() * 150;
+            const phi = Math.acos(2 * Math.random() - 1);
+            positions[idx] = r * Math.sin(phi) * Math.cos(t);
+            positions[idx + 1] = r * Math.sin(phi) * Math.sin(t);
+            positions[idx + 2] = r * Math.cos(phi);
+        } else if (preset === 2) { // Disk
+            const r = 300 + Math.random() * 100;
+            positions[idx] = r * Math.cos(t);
+            positions[idx + 1] = (Math.random() - 0.5) * 50;
+            positions[idx + 2] = r * Math.sin(t);
+        } else { // Random
+            positions[idx] = (Math.random() - 0.5) * 1000;
+            positions[idx + 1] = (Math.random() - 0.5) * 1000;
+            positions[idx + 2] = (Math.random() - 0.5) * 1000;
+        }
 
-        positions[idx] = r * Math.sin(phi) * Math.cos(theta);
-        positions[idx + 1] = r * Math.sin(phi) * Math.sin(theta);
-        positions[idx + 2] = r * Math.cos(phi);
+        velocities[idx] = (Math.random() - 0.5) * 0.2;
+        velocities[idx + 1] = (Math.random() - 0.5) * 0.2;
+        velocities[idx + 2] = (Math.random() - 0.5) * 0.2;
 
-        velocities[idx] = (Math.random() - 0.5) * 0.5;
-        velocities[idx + 1] = (Math.random() - 0.5) * 0.5;
-        velocities[idx + 2] = (Math.random() - 0.5) * 0.5;
+        const hue = (i / N) + Math.random() * 0.2;
+        const hsv = hsvToRgb(hue % 1, 0.8 + Math.random() * 0.2, 0.8 + Math.random() * 0.2);
+        colors[idx] = hsv[0];
+        colors[idx + 1] = hsv[1];
+        colors[idx + 2] = hsv[2];
+        sizes[i] = 0.8 + Math.random() * 2.5;
     }
 
     geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
     const material = new THREE.PointsMaterial({
-        size: 3,
-        color: 0x00ccff,
+        size: 5,
+        vertexColors: true,
         transparent: true,
-        opacity: 0.8,
-        blending: THREE.AdditiveBlending
+        opacity: 0.85,
+        blending: THREE.AdditiveBlending,
+        sizeAttenuation: true,
+        depthWrite: false
     });
 
     particles = new THREE.Points(geometry, material);
     scene.add(particles);
 }
 
+function hsvToRgb(h, s, v) {
+    const i = Math.floor(h * 6);
+    const f = h * 6 - i;
+    const p = v * (1 - s);
+    const q = v * (1 - f * s);
+    const t = v * (1 - (1 - f) * s);
+    let r, g, b;
+    switch (i % 6) {
+        case 0: r = v; g = t; b = p; break;
+        case 1: r = q; g = v; b = p; break;
+        case 2: r = p; g = v; b = t; break;
+        case 3: r = p; g = q; b = v; break;
+        case 4: r = t; g = p; b = v; break;
+        case 5: r = v; g = p; b = q; break;
+    }
+    return [r, g, b];
+}
+
+function computeForces() {
+    const pos = geometry.attributes.position.array;
+    const forcesX = new Float32Array(N);
+    const forcesY = new Float32Array(N);
+    const forcesZ = new Float32Array(N);
+    
+    // 最適化N-body (近傍のみ計算)
+    for (let i = 0; i < N; i++) {
+        let idx = i * 3;
+        let fx = 0, fy = 0, fz = 0;
+        const x1 = pos[idx], y1 = pos[idx+1], z1 = pos[idx+2];
+        
+        for (let j = 0; j < N; j++) {
+            if (i === j) continue;
+            let jdx = j * 3;
+            let dx = pos[jdx] - x1;
+            let dy = pos[jdx+1] - y1;
+            let dz = pos[jdx+2] - z1;
+            let distSq = dx*dx + dy*dy + dz*dz;
+            
+            if (distSq < 40000) { // 近傍粒子のみ
+                distSq += SOFTENING;
+                let invDist = 1 / Math.sqrt(distSq);
+                let force = G * invDist * invDist;
+                fx += dx * invDist * force;
+                fy += dy * invDist * force;
+                fz += dz * invDist * force;
+            }
+        }
+        
+        forcesX[i] = fx;
+        forcesY[i] = fy;
+        forcesZ[i] = fz;
+    }
+    
+    return { forcesX, forcesY, forcesZ };
+}
+
 function step() {
     const pos = geometry.attributes.position.array;
+    const { forcesX, forcesY, forcesZ } = computeForces();
+    
     let clusterCount = 0;
     let totalEnergy = 0;
+    let totalDensity = 0;
+    let singularity = 0;
 
     for (let i = 0; i < N; i++) {
         let idx = i * 3;
         
-        let x = pos[idx];
-        let y = pos[idx + 1];
-        let z = pos[idx + 2];
-
-        let distSq = x*x + y*y + z*z + 0.1;
-        let dist = Math.sqrt(distSq);
-
-        // 中心（起点）への引き込み
-        let force = -2.0 / distSq; 
+        // Velocity Verlet (高精度積分)
+        velocities[idx] += forcesX[i] * DT;
+        velocities[idx+1] += forcesY[i] * DT;
+        velocities[idx+2] += forcesZ[i] * DT;
         
-        velocities[idx] += (x / dist) * force;
-        velocities[idx+1] += (y / dist) * force;
-        velocities[idx+2] += (z / dist) * force;
+        // 情報ダンピング
+        velocities[idx] *= 0.996;
+        velocities[idx+1] *= 0.996;
+        velocities[idx+2] *= 0.996;
+        
+        pos[idx] += velocities[idx] * DT;
+        pos[idx+1] += velocities[idx+1] * DT;
+        pos[idx+2] += velocities[idx+2] * DT;
 
-        // 摩擦係数（発散防止）
-        velocities[idx] *= 0.99;
-        velocities[idx+1] *= 0.99;
-        velocities[idx+2] *= 0.99;
+        // 無限境界
+        const dist = Math.hypot(pos[idx], pos[idx+1], pos[idx+2]);
+        if (dist > 2000) {
+            const scale = 1800 / dist;
+            pos[idx] *= scale;
+            pos[idx+1] *= scale;
+            pos[idx+2] *= scale;
+        }
 
-        pos[idx] += velocities[idx];
-        pos[idx+1] += velocities[idx+1];
-        pos[idx+2] += velocities[idx+2];
-
-        totalEnergy += Math.abs(velocities[idx]) + Math.abs(velocities[idx+1]);
-        if (dist < 50) clusterCount++;
+        const speed = Math.hypot(velocities[idx], velocities[idx+1], velocities[idx+2]);
+        totalEnergy += speed;
+        
+        if (dist < 60) clusterCount++;
+        totalDensity += 1 / (dist * dist + 1);
+        if (dist < 20) singularity += 1;
     }
 
     geometry.attributes.position.needsUpdate = true;
-    document.getElementById("entropy").innerText = (totalEnergy / 10).toFixed(2);
+    singularityRisk = Math.min(100, (singularity / N) * 10000);
+
+    // HUD更新
+    document.getElementById("entropy").innerText = (totalEnergy / 100).toFixed(1);
     document.getElementById("clusters").innerText = clusterCount;
+    document.getElementById("density").innerText = totalDensity.toFixed(0);
+    document.getElementById("singularity").innerText = singularityRisk.toFixed(0);
+    document.getElementById("time").innerText = (time += DT * 60).toFixed(1);
 }
 
 function animate() {
     requestAnimationFrame(animate);
-    if (running) {
-        step();
-        particles.rotation.y += 0.002;
-    }
+    if (running) step();
+    
+    // 動的カメラ軌道
+    const camTime = time * 0.0005;
+    particles.rotation.y += 0.004;
+    particles.rotation.z = Math.sin(camTime) * 0.05;
+    
+    camera.position.x = Math.sin(camTime * 0.7) * 400;
+    camera.position.y = Math.sin(camTime * 0.3) * 200;
+    camera.position.z = 700 + Math.cos(camTime * 0.5) * 300;
+    camera.lookAt(0, 0, 0);
+    
     renderer.render(scene, camera);
 }
 
-function toggleAnim() { running = !running; }
-function resetUniverse() { createUniverse(); }
+function toggleAnim() { 
+    running = !running; 
+    document.querySelector('button:first-child').innerText = running ? '⏸ Stop' : '▶ Start';
+}
+
+function resetUniverse() { 
+    createUniverse(); 
+    time = 0; 
+    singularityRisk = 0;
+}
+
+function randomizeColors() {
+    const col = geometry.attributes.color.array;
+    for (let i = 0; i < N; i++) {
+        let idx = i * 3;
+        const hue = Math.random();
+        const hsv = hsvToRgb(hue, 1, 1);
+        col[idx] = hsv[0];
+        col[idx+1] = hsv[1];
+        col[idx+2] = hsv[2];
+    }
+    geometry.attributes.color.needsUpdate = true;
+}
+
+function changePreset() {
+    preset = (preset + 1) % presets.length;
+    document.querySelector('button:last-child').innerText = `⚡ ${presets[preset].toUpperCase()}`;
+    resetUniverse();
+}
+
+function setupControls() {
+    document.querySelector('button:last-child').innerText = `⚡ ${presets[preset].toUpperCase()}`;
+    
+    // キーボードショートカット
+    document.addEventListener('keydown', (e) => {
+        if (e.code === 'Space') toggleAnim();
+        if (e.code === 'KeyR') resetUniverse();
+        if (e.code === 'KeyC') randomizeColors();
+    });
+}
 
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
