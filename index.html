@@ -2,207 +2,81 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Universal Emergence Simulator</title>
+<title>Suzuki Information Emergence</title>
 
 <style>
 
 body{
 margin:0;
-overflow:hidden;
 background:black;
 color:white;
 font-family:Arial;
+overflow-x:hidden;
 }
 
-#title{
-position:absolute;
-top:20px;
-left:20px;
-font-size:22px;
+canvas{
+position:fixed;
+top:0;
+left:0;
+z-index:-1;
 }
 
-#info{
-position:absolute;
-bottom:20px;
-left:20px;
-font-size:14px;
-opacity:0.7;
+section{
+height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+flex-direction:column;
+text-align:center;
+}
+
+h1{
+font-size:42px;
+margin-bottom:10px;
+}
+
+p{
+max-width:700px;
+opacity:0.75;
 }
 
 </style>
-
 </head>
 
 <body>
 
-<div id="title">
-Universal Emergence Simulator
-</div>
+<canvas id="bg"></canvas>
 
-<div id="info">
-Suzuki Information Emergence Model
-</div>
+<section>
+<h1>Suzuki Information Emergence</h1>
+<p>11D Information Field → Universe → Life → Molecules → Intelligence</p>
+</section>
+
+<section>
+<h1>Cosmic Web</h1>
+<p>Large scale structure formation</p>
+</section>
+
+<section>
+<h1>Life Emergence</h1>
+<p>Self-organizing information networks</p>
+</section>
+
+<section>
+<h1>Molecular Systems</h1>
+<p>Complex chemical attractors</p>
+</section>
+
+<section>
+<h1>Artificial Intelligence</h1>
+<p>Information evolution</p>
+</section>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 
 <script>
 
-const PHI=(1+Math.sqrt(5))/2
-const DIM_HIGH=11
-const DIM_LOW=3
-
-const N=400
-
-// ----------------
-// 高次元宇宙
-// ----------------
-
-function generateUniverse(){
-
-let arr=[]
-
-for(let i=0;i<N;i++){
-
-let p=[]
-
-for(let d=0;d<DIM_HIGH;d++){
-
-p.push((Math.random()-0.5)*1.5)
-
-}
-
-arr.push(p)
-
-}
-
-return arr
-
-}
-
-// ----------------
-// 準結晶射影
-// ----------------
-
-function project(points){
-
-let M=[]
-
-for(let i=0;i<DIM_HIGH;i++){
-
-let row=[]
-
-for(let j=0;j<DIM_LOW;j++){
-
-row.push(Math.random())
-
-}
-
-M.push(row)
-
-}
-
-M[0][0]*=PHI
-M[1][1]*=PHI
-
-let out=[]
-
-for(let p of points){
-
-let q=[0,0,0]
-
-for(let i=0;i<DIM_HIGH;i++){
-
-for(let j=0;j<DIM_LOW;j++){
-
-q[j]+=p[i]*M[i][j]
-
-}
-
-}
-
-out.push(q)
-
-}
-
-return out
-
-}
-
-// ----------------
-// 相互作用
-// ----------------
-
-function interaction(points){
-
-let J=[]
-
-for(let i=0;i<N;i++){
-
-J[i]=[]
-
-for(let j=0;j<N;j++){
-
-if(i===j){
-
-J[i][j]=0
-continue
-
-}
-
-let dx=points[i][0]-points[j][0]
-let dy=points[i][1]-points[j][1]
-let dz=points[i][2]-points[j][2]
-
-let d=Math.sqrt(dx*dx+dy*dy+dz*dz)
-
-J[i][j]=Math.exp(-d)
-
-}
-
-}
-
-return J
-
-}
-
-// ----------------
-// ダイナミクス
-// ----------------
-
-function step(X,J){
-
-let newX=[]
-
-for(let i=0;i<N;i++){
-
-let inf=[0,0,0]
-
-for(let j=0;j<N;j++){
-
-inf[0]+=J[i][j]*X[j][0]
-inf[1]+=J[i][j]*X[j][1]
-inf[2]+=J[i][j]*X[j][2]
-
-}
-
-newX[i]=[
-
-X[i][0]+0.002*(inf[0]-X[i][0]),
-X[i][1]+0.002*(inf[1]-X[i][1]),
-X[i][2]+0.002*(inf[2]-X[i][2])
-
-]
-
-}
-
-return newX
-
-}
-
-
-// ----------------
-// THREE.js
-// ----------------
+const canvas=document.getElementById("bg")
 
 const scene=new THREE.Scene()
 
@@ -215,42 +89,41 @@ window.innerWidth/window.innerHeight,
 
 camera.position.z=80
 
-const renderer=new THREE.WebGLRenderer()
+const renderer=new THREE.WebGLRenderer({canvas})
 
 renderer.setSize(window.innerWidth,window.innerHeight)
 
-document.body.appendChild(renderer.domElement)
 
+// --------------------
+// 粒子生成
+// --------------------
 
-// ----------------
-// データ
-// ----------------
+const N=1500
 
-let universe=generateUniverse()
-let points=project(universe)
-let J=interaction(points)
-
-const geometry=new THREE.BufferGeometry()
-
-let positions=new Float32Array(N*3)
+let positions=new Float32Array(N3)
+let velocity=new Float32Array(N3)
 
 for(let i=0;i<N;i++){
 
-positions[i*3]=points[i][0]
-positions[i*3+1]=points[i][1]
-positions[i*3+2]=points[i][2]
+positions[i3]=(Math.random()-0.5)120
+positions[i3+1]=(Math.random()-0.5)120
+positions[i3+2]=(Math.random()-0.5)120
+
+velocity[i3]=(Math.random()-0.5)0.03
+velocity[i3+1]=(Math.random()-0.5)0.03
+velocity[i3+2]=(Math.random()-0.5)0.03
 
 }
 
+const geometry=new THREE.BufferGeometry()
+
 geometry.setAttribute(
-'position',
+"position",
 new THREE.BufferAttribute(positions,3)
 )
 
 const material=new THREE.PointsMaterial({
-
-size:0.6
-
+size:0.8
 })
 
 const particles=new THREE.Points(geometry,material)
@@ -258,28 +131,64 @@ const particles=new THREE.Points(geometry,material)
 scene.add(particles)
 
 
-// ----------------
-// アニメーション
-// ----------------
+// --------------------
+// スクロール
+// --------------------
 
-function animate(){
+let scrollY=0
 
-requestAnimationFrame(animate)
+window.addEventListener("scroll",()=>{
 
-points=step(points,J)
+scrollY=window.scrollY
+
+})
+
+
+// --------------------
+// 創発ダイナミクス
+// --------------------
+
+function step(){
 
 for(let i=0;i<N;i++){
 
-positions[i*3]=points[i][0]
-positions[i*3+1]=points[i][1]
-positions[i*3+2]=points[i][2]
+let x=positions[i3]
+let y=positions[i3+1]
+let z=positions[i3+2]
+
+let r=Math.sqrt(xx+yy+zz)+0.0001
+
+let force=-0.0003r
+
+velocity[i3]+=forcex/r
+velocity[i3+1]+=forcey/r
+velocity[i3+2]+=forcez/r
+
+positions[i3]+=velocity[i3]
+positions[i3+1]+=velocity[i3+1]
+positions[i3+2]+=velocity[i3+2]
 
 }
 
 geometry.attributes.position.needsUpdate=true
 
-particles.rotation.y+=0.0005
+}
+
+
+// --------------------
+// アニメーション
+// --------------------
+
+function animate(){
+
+requestAnimationFrame(animate)
+
+step()
+
+particles.rotation.y+=0.0006
 particles.rotation.x+=0.0002
+
+camera.position.z=80 + scrollY0.05
 
 renderer.render(scene,camera)
 
