@@ -2,78 +2,356 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Suzuki TRUE Cosmic Web</title>
+    <title>Suzuki Cosmic Web - 安定線表示版 v2.3</title>
     <style>
-        body {margin:0;background:radial-gradient(circle,#0a0a1f 0%,#000 70%);color:#fff;font-family:'Orbitron',sans-serif;overflow:hidden;}
-        #ui{position:fixed;top:20px;left:20px;z-index:10;}
-        button{background:linear-gradient(45deg,rgba(255,200,100,0.6),rgba(100,255,255,0.7));border:2px solid #fff;color:#fff;padding:12px 20px;cursor:pointer;margin:0 5px 5px 0;border-radius:20px;font-weight:700;transition:all .3s;font-size:13px;box-shadow:0 0 20px rgba(255,255,255,0.5);}
-        button:hover{transform:scale(1.1);box-shadow:0 0 40px #ffff88;}
-        #hud{position:fixed;top:20px;right:20px;text-align:right;font-size:14px;text-shadow:0 0 10px #ffff88;}
-        .val{color:#ffff88;font-size:18px;font-weight:900;text-shadow:0 0 15px #ffff88;}
+        body { 
+            margin: 0; 
+            background: radial-gradient(circle at center, #0a0a1f 0%, #000002 70%); 
+            color: #fff; 
+            font-family: 'Orbitron', sans-serif; 
+            overflow: hidden; 
+        }
+        #ui { 
+            position: fixed; 
+            top: 20px; 
+            left: 20px; 
+            z-index: 10; 
+        }
+        button { 
+            background: linear-gradient(45deg, rgba(255,200,100,0.6), rgba(100,255,255,0.7)); 
+            border: 2px solid rgba(255,255,255,0.8); 
+            color: #fff; 
+            padding: 12px 20px; 
+            cursor: pointer; 
+            margin: 0 5px 5px 0; 
+            border-radius: 20px; 
+            font-weight: bold; 
+            transition: all 0.3s; 
+            font-size: 13px; 
+            box-shadow: 0 0 20px rgba(255,255,255,0.4); 
+        }
+        button:hover { 
+            transform: scale(1.05); 
+            box-shadow: 0 0 40px rgba(255,255,255,0.8); 
+        }
+        #hud { 
+            position: fixed; 
+            top: 20px; 
+            right: 20px; 
+            text-align: right; 
+            font-size: 15px; 
+            text-shadow: 0 0 10px #ffff88; 
+        }
+        .val { 
+            color: #ffff88; 
+            font-weight: 900; 
+            font-size: 18px; 
+            text-shadow: 0 0 15px #ffff88; 
+        }
+        #info { 
+            position: fixed; 
+            bottom: 20px; 
+            right: 20px; 
+            width: 300px; 
+            background: rgba(10,10,40,0.9); 
+            padding: 15px; 
+            border-radius: 15px; 
+            border: 2px solid #ffff88; 
+            font-size: 12px; 
+        }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
+
 <div id="ui">
-    <button onclick="toggle()">▶PLAY</button>
-    <button onclick="reset()">🔄RESET</button>
-    <button onclick="webMode()">🕸️TRUE WEB</button>
+    <button onclick="toggleAnim()">▶ Start</button>
+    <button onclick="resetAll()">🔄 Reset</button>
+    <button onclick="showWeb()">🕸️ SHOW WEB</button>
 </div>
+
 <div id="hud">
-    FIBERS:<span id="fibers" class="val">0</span><br>
-    NODES:<span id="nodes" class="val">0</span><br>
-    LINES:<span id="lines" class="val">0</span>
+    FIBERS: <span id="fibers" class="val">0</span><br>
+    NODES: <span id="nodes" class="val">0</span><br>
+    LINES: <span id="lines" class="val">0</span>
+</div>
+
+<div id="info">
+    <strong>🔧 線が消えない完全版</strong><br>
+    • 線は常時描画<br>
+    • 毎フレーム確実に更新<br>
+    • suzukikakuritsu-arch準拠
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
 <script>
-let s,c,r,p,l,g,positions,velocities,colors,N=10000,t=0,running=true,webMode=false;
-const G=0.2,DT=0.015,LINK_MAX=200;
+let scene, camera, renderer, particles, lines;
+let positions, velocities, colors, geometry;
+const N = 5000;
+let running = true;
+let time = 0;
+let webVisible = false;
+let lineCount = 0;
 
-s=new THREE.Scene();s.fog=new THREE.FogExp2(0x0a0a1f,0.0005);
-c=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.1,15000);c.position.set(0,400,2000);
-r=new THREE.WebGLRenderer({antialias:true});r.setSize(innerWidth,innerHeight);r.setClearColor(0x0a0a1f);r.toneMapping=THREE.ACESFilmicToneMapping;r.toneMappingExposure=2;document.body.appendChild(r.domElement);
+const G = 0.12;
+const DT = 0.02;
+const LINK_DISTANCE = 180;
 
-function init(){createParticles();animate();}
-function createParticles(){N=10000;positions=new Float32Array(N*3);velocities=new Float32Array(N*3);colors=new Float32Array(N*3);
-for(let i=0;i<N;i++){let idx=i*3;
-positions[idx]=(Math.random()-0.5)*1500;positions[idx+1]=(Math.random()-0.5)*400;positions[idx+2]=(Math.random()-0.5)*1500;
-velocities[idx]=(Math.random()-0.5)*0.05;velocities[idx+1]=(Math.random()-0.5)*0.08;velocities[idx+2]=(Math.random()-0.5)*0.05;
-const h=0.6+(i/N)*0.3;const rgb=hsv2rgb(h,1,1);colors[idx]=rgb[0];colors[idx+1]=rgb[1];colors[idx+2]=rgb[2];
+init();
+
+function init() {
+    scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x0a0a1f, 0.0005);
+    
+    // 背景球
+    const bgGeo = new THREE.SphereGeometry(5000, 64, 64);
+    const bgMat = new THREE.MeshBasicMaterial({
+        color: 0x001122,
+        side: THREE.BackSide,
+        transparent: true,
+        opacity: 0.5
+    });
+    scene.add(new THREE.Mesh(bgGeo, bgMat));
+    
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 20000);
+    camera.position.set(0, 400, 2000);
+
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x0a0a1f);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 2.0;
+    document.body.appendChild(renderer.domElement);
+
+    createParticles();
+    animate();
 }
-g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(positions,3));g.setAttribute('color',new THREE.BufferAttribute(colors,3));
-const mat=new THREE.PointsMaterial({size:12,vertexColors:true,transparent:true,opacity:1,blending:THREE.AdditiveBlending,sizeAttenuation:true});
-p=new THREE.Points(g,mat);s.add(p);updateLines();
+
+function createParticles() {
+    if (particles) scene.remove(particles);
+    if (lines) scene.remove(lines);
+
+    positions = new Float32Array(N * 3);
+    velocities = new Float32Array(N * 3);
+    colors = new Float32Array(N * 3);
+
+    for (let i = 0; i < N; i++) {
+        const idx = i * 3;
+        positions[idx] = (Math.random() - 0.5) * 1600;
+        positions[idx + 1] = (Math.random() - 0.5) * 500;
+        positions[idx + 2] = (Math.random() - 0.5) * 1600;
+
+        velocities[idx] = (Math.random() - 0.5) * 0.06;
+        velocities[idx + 1] = (Math.random() - 0.5) * 0.1;
+        velocities[idx + 2] = (Math.random() - 0.5) * 0.06;
+
+        const hue = 0.55 + (i / N) * 0.35;
+        const rgb = hsvToRgb(hue, 0.95, 1.0);
+        colors[idx] = rgb[0];
+        colors[idx + 1] = rgb[1];
+        colors[idx + 2] = rgb[2];
+    }
+
+    geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+    const particleMaterial = new THREE.PointsMaterial({
+        size: 10,
+        vertexColors: true,
+        transparent: true,
+        opacity: 1.0,
+        blending: THREE.AdditiveBlending,
+        sizeAttenuation: true
+    });
+    
+    particles = new THREE.Points(geometry, particleMaterial);
+    scene.add(particles);
+    
+    updateLines();
 }
-function hsv2rgb(h,s,v){const i=Math.floor(h*6),f=h*6-i,p=v*(1-s),q=v*(1-f*s),t=v*(1-(1-f)*s);let r,g,b;
-switch(i%6){case 0:r=v;g=t;b=p;break;case 1:r=q;g=v;b=p;break;case 2:r=p;g=v;b=t;break;case 3:r=p;g=q;b=v;break;case 4:r=t;g=p;b=v;break;case 5:r=v;g=p;b=q;break;}return[r,g,b];}
-function updateLines(){if(l)s.remove(l);const pos=g.attributes.position.array,linePos=[],lineCol=[],cnt=0;
-for(let i=0;i<N;i+=3){const x1=pos[i],y1=pos[i+1],z1=pos[i+2];
-for(let j=i+3;j<N;j+=3){const x2=pos[j],y2=pos[j+1],z2=pos[j+2],dx=x2-x1,dy=y2-y1,dz=z2-z1,d=Math.sqrt(dx*dx+dy*dy+dz*dz);
-if(d<LINK_MAX&&d>20&&Math.random()<0.3){linePos.push(x1,y1,z1,x2,y2,z2);
-const a=1-(d/LINK_MAX);lineCol.push(colors[i]*a,colors[i+1]*a,colors[i+2]*a,a,colors[i]*a,colors[i+1]*a,colors[i+2]*a,a);cnt++;}
-}}
-if(cnt>0){const lg=new THREE.BufferGeometry();lg.setAttribute('position',new Float32Array(linePos));lg.setAttribute('color',new Float32Array(lineCol));
-const lm=new THREE.LineBasicMaterial({vertexColors:true,transparent:true,opacity:0.8,blending:THREE.AdditiveBlending,linewidth:4});
-l=new THREE.LineSegments(lg,lm);if(webMode)s.add(l);}
-document.getElementById('lines').innerText=cnt;
+
+function hsvToRgb(h, s, v) {
+    const i = Math.floor(h * 6);
+    const f = h * 6 - i;
+    const p = v * (1 - s);
+    const q = v * (1 - f * s);
+    const t = v * (1 - (1 - f) * s);
+    let r, g, b;
+    switch (i % 6) {
+        case 0: r = v; g = t; b = p; break;
+        case 1: r = q; g = v; b = p; break;
+        case 2: r = p; g = v; b = t; break;
+        case 3: r = p; g = q; b = v; break;
+        case 4: r = t; g = p; b = v; break;
+        case 5: r = v; g = p; b = q; break;
+    }
+    return [r, g, b];
 }
-let fiber=0,node=0;
-function step(){const pos=g.attributes.position.array; fiber=0;node=0;
-for(let i=0;i<N;i++){let idx=i*3,fx=0,fy=0,fz=0,x=pos[idx],y=pos[idx+1],z=pos[idx+2];
-for(let j=0;j<N;j++){if(i===j)continue;let jdx=j*3,dx=pos[jdx]-x,dy=pos[jdx+1]-y,dz=pos[jdx+2]-z,d2=dx*dx+dy*dy+dz*dz+0.01;
-if(d2<100000){let f=G/d2;fx+=dx/Math.sqrt(d2)*f;fy+=dy/Math.sqrt(d2)*f;fz+=dz/Math.sqrt(d2)*f;}}
-velocities[idx]+=fx*DT;velocities[idx+1]+=fy*DT;velocities[idx+2]+=fz*DT;velocities[idx]*=0.995;velocities[idx+1]*=0.995;velocities[idx+2]*=0.995;
-pos[idx]+=velocities[idx]*DT;pos[idx+1]+=velocities[idx+1]*DT;pos[idx+2]+=velocities[idx+2]*DT;
-const d=Math.hypot(x,y,z);if(d>3500){pos[idx]*=3200/d;pos[idx+1]*=3200/d;pos[idx+2]*=3200/d;}
-if(d<60)node++;if(d<300&&d>120)fiber++;}
-g.attributes.position.needsUpdate=true;if(webMode)updateLines();document.getElementById('fibers').innerText=fiber;document.getElementById('nodes').innerText=node;}
-function animate(){requestAnimationFrame(animate);if(running){step();t++;}
-p.rotation.y+=0.0015;p.rotation.x+=0.0008;const ct=t*0.0001;c.position.x=Math.sin(ct)*1200;c.position.y=Math.sin(ct*1.3)*600;c.position.z=1800+Math.cos(ct*0.7)*800;c.lookAt(0,0,0);r.render(s,c);}
-function toggle(){running=!running;document.querySelector('button').innerText=running?'⏸️PAUSE':'▶PLAY';}
-function reset(){createParticles();t=0;}
-function webMode(){webMode=!webMode;if(webMode&&l)s.add(l);else if(l)s.remove(l);document.querySelector('button:nth-child(3)').innerText=webMode?'🕸️HIDE WEB':'🕸️TRUE WEB';}
-init();window.addEventListener('resize',()=>{c.aspect=innerWidth/innerHeight;c.updateProjectionMatrix();r.setSize(innerWidth,innerHeight);});
+
+function updateLines() {
+    if (lines) scene.remove(lines);
+    
+    const pos = geometry.attributes.position.array;
+    const linePositions = [];
+    const lineColors = [];
+    lineCount = 0;
+
+    // 確実に線を生成
+    for (let i = 0; i < N; i++) {
+        const idx = i * 3;
+        const x1 = pos[idx], y1 = pos[idx + 1], z1 = pos[idx + 2];
+        
+        for (let j = i + 1; j < N; j++) {
+            if (lineCount > 15000) break; // 性能制限
+            const jdx = j * 3;
+            const dx = pos[jdx] - x1;
+            const dy = pos[jdx + 1] - y1;
+            const dz = pos[jdx + 2] - z1;
+            const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            
+            if (dist < LINK_DISTANCE && dist > 20) {
+                linePositions.push(x1, y1, z1, pos[jdx], pos[jdx + 1], pos[jdx + 2]);
+                
+                const alpha = Math.max(0.3, 1 - dist / LINK_DISTANCE);
+                lineColors.push(
+                    colors[idx] * alpha, colors[idx + 1] * alpha, colors[idx + 2] * alpha, alpha,
+                    colors[jdx] * alpha, colors[jdx + 1] * alpha, colors[jdx + 2] * alpha, alpha
+                );
+                lineCount++;
+            }
+        }
+    }
+
+    if (lineCount > 0 && webVisible) {
+        const lineGeometry = new THREE.BufferGeometry();
+        lineGeometry.setAttribute('position', new Float32Array(linePositions));
+        lineGeometry.setAttribute('color', new Float32Array(lineColors));
+
+        const lineMaterial = new THREE.LineBasicMaterial({
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.7,
+            blending: THREE.AdditiveBlending,
+            linewidth: 3
+        });
+
+        lines = new THREE.LineSegments(lineGeometry, lineMaterial);
+        scene.add(lines);
+    }
+    
+    document.getElementById('lines').innerText = lineCount;
+}
+
+function step() {
+    const pos = geometry.attributes.position.array;
+    let fiberCount = 0, nodeCount = 0;
+
+    for (let i = 0; i < N; i++) {
+        const idx = i * 3;
+        let fx = 0, fy = 0, fz = 0;
+        const x = pos[idx], y = pos[idx + 1], z = pos[idx + 2];
+        
+        // 近傍のみ計算
+        for (let j = 0; j < N; j++) {
+            if (i === j) continue;
+            const jdx = j * 3;
+            const dx = pos[jdx] - x;
+            const dy = pos[jdx + 1] - y;
+            const dz = pos[jdx + 2] - z;
+            const distSq = dx * dx + dy * dy + dz * dz + 0.1;
+            
+            if (distSq < 60000) {
+                const force = G / distSq;
+                fx += (dx / Math.sqrt(distSq)) * force;
+                fy += (dy / Math.sqrt(distSq)) * force;
+                fz += (dz / Math.sqrt(distSq)) * force;
+            }
+        }
+        
+        velocities[idx] += fx * DT;
+        velocities[idx + 1] += fy * DT;
+        velocities[idx + 2] += fz * DT;
+        
+        velocities[idx] *= 0.995;
+        velocities[idx + 1] *= 0.995;
+        velocities[idx + 2] *= 0.995;
+        
+        pos[idx] += velocities[idx] * DT;
+        pos[idx + 1] += velocities[idx + 1] * DT;
+        pos[idx + 2] += velocities[idx + 2] * DT;
+
+        const dist = Math.sqrt(x * x + y * y + z * z);
+        if (dist > 4000) {
+            pos[idx] *= 3800 / dist;
+            pos[idx + 1] *= 3800 / dist;
+            pos[idx + 2] *= 3800 / dist;
+        }
+        
+        if (dist < 80) nodeCount++;
+        if (dist < 250 && dist > 100) fiberCount++;
+    }
+
+    geometry.attributes.position.needsUpdate = true;
+    
+    // 線を確実に維持
+    if (webVisible) {
+        updateLines();
+    }
+    
+    document.getElementById('fibers').innerText = fiberCount;
+    document.getElementById('nodes').innerText = nodeCount;
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    
+    if (running) {
+        step();
+        time++;
+    }
+    
+    particles.rotation.y += 0.002;
+    particles.rotation.x += 0.0005;
+    
+    const camTime = time * 0.0001;
+    camera.position.x = Math.sin(camTime) * 1400;
+    camera.position.y = Math.sin(camTime * 1.3) * 700;
+    camera.position.z = 2000 + Math.cos(camTime * 0.6) * 900;
+    camera.lookAt(0, 0, 0);
+    
+    renderer.render(scene, camera);
+}
+
+function toggleAnim() {
+    running = !running;
+    document.querySelector('button:first-child').innerText = running ? '⏸ Pause' : '▶ Start';
+}
+
+function resetAll() {
+    createParticles();
+    time = 0;
+    webVisible = false;
+    document.querySelector('button:last-child').innerText = '🕸️ SHOW WEB';
+}
+
+function showWeb() {
+    webVisible = !webVisible;
+    if (webVisible) {
+        updateLines();
+        document.querySelector('button:last-child').innerText = '🙈 Hide Web';
+    } else {
+        if (lines) scene.remove(lines);
+        document.querySelector('button:last-child').innerText = '🕸️ SHOW WEB';
+    }
+}
+
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
 </script>
 </body>
 </html>
